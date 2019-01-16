@@ -1,2 +1,2 @@
 # sparktuner
-Autotuner for Spark application
+Autotuner for Spark applications
