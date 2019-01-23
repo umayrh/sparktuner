@@ -1,0 +1,3 @@
+[console_scripts]
+sparktuner = sparktuner.spark_tuner:main
+

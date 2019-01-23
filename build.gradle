@@ -1,0 +1,97 @@
+version = "0.1.0"
+description = "Use OpenTuner to tune Spark applications"
+
+buildscript {
+    repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "gradle.plugin.com.linkedin.pygradle:pygradle-plugin:0.9.11"
+    }
+}
+
+apply plugin: "idea"
+apply plugin: 'com.linkedin.python'
+apply plugin: 'com.linkedin.python-sdist'
+apply plugin: 'com.linkedin.python-cli'
+
+idea {
+    module {
+        sourceDirs += file('src')
+        testSourceDirs += file('test')
+    }
+}
+
+python {
+    details {
+        pythonVersion = '2.7'
+    }
+}
+
+repositories {
+    pyGradlePyPi()
+    ivy {
+        // Can't easily use a "global" local repo since
+        // pivy-importer clobbers pre-existing libraries, which
+        // could possibly create build problems for other packages
+        // when builds are running in parallel.
+        url "build/local-ivy-repo"
+        layout('pattern') {
+            ivy "[organisation]/[module]/[revision]/[module]-[revision].ivy"
+            artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"
+            m2compatible true
+        }
+    }
+}
+
+// Workaround due to PyGradle's lack of support for native PyPi repos
+task pipInstallRequirements(type: Exec) {
+    commandLine "bash", "-c", "source build/venv/bin/activate && pip install -r requirements.txt && deactivate"
+}
+
+task pipInstallRequests(type: Exec) {
+    commandLine "pip", "install", "-q", "requests"
+}
+
+// TODO: Offline test requires  gradle check -x getRequirements since
+// we're clobbering the local Ivy repo every time
+task getRequirements(type: Exec) {
+    dependsOn pipInstallRequests
+    commandLine "python", "scripts/get_requirements.py", "build/local-ivy-repo"
+    standardOutput = new ByteArrayOutputStream()
+    ext.output = {
+        return standardOutput.toString()
+    }
+}
+
+task printReq {
+    dependsOn getRequirements
+    println tasks.getRequirements.output()
+}
+
+task printExternalDependencies {
+    // it would be nice for setup.py to reference these
+    // dependencies, and, separately, to use `pip freeze`
+    // to write a requirements.txt
+    doLast {
+        println(project.configurations.python.allDependencies)
+    }
+}
+
+installBuildRequirements.dependsOn getRequirements
+
+dependencies {
+    python 'pypi:psutil:5.4.8'
+    python 'pypi:requests:2.21.0'
+    python 'pypi:opentuner:0.8.0'
+    // dunno why this was packaged anyway but cannot
+    // build wheel for unittest2. Thanks to
+    // https://github.com/linkedin/pygradle/issues/96
+    python ('pypi:humanfriendly:4.17') {
+        exclude module: 'unittest2'
+    }
+    python 'pypi:chainmap:1.0.2'
+    test 'pypi:requests-mock:1.5.2'
+}

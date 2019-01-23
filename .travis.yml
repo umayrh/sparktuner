@@ -1,0 +1,40 @@
+language: generic
+sudo: required
+# Promote to xenial when Travis fixes
+# https://travis-ci.community/t/oracle-jdk-11-and-10-are-pre-installed-not-the-openjdk-builds/785/6
+dist: trusty
+
+env:
+- PYENV_REHASH_TIMEOUT=120
+
+addons:
+  apt:
+    packages:
+      - axel
+
+before_install: ./scripts/travis-setup.sh
+
+install:
+  - ./gradlew build
+
+jdk:
+  - oraclejdk8
+
+python:
+  - "2.7.10"
+
+cache:
+  apt: true
+  packages: true
+  directories:
+    - $HOME/.m2
+    - $HOME/.cache
+    - $HOME/.cache/pip
+    - $TRAVIS_BUILD_DIR/build/venv/lib
+
+branches:
+  only:
+    - master
+notifications:
+  email:
+    - umayrh@gmail.com
