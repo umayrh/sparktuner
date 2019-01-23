@@ -1,5 +1,7 @@
 # Spark Tuner
 
+[![Build Status](https://travis-ci.org/umayrh/sparktuner.svg?branch=master)](https://travis-ci.org/umayrh/sparktuner)
+
 ## Setup, build, and usage
 
 #### Setup
