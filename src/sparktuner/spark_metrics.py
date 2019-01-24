@@ -1,8 +1,11 @@
 import abc
 import time
 import psutil
+import logging
 
-from yarn_metrics import YarnMetricsCollector
+from yarn_metrics import YarnMetricsCollector, YarnMetricsError
+
+log = logging.getLogger(__name__)
 
 
 class SparkMetrics:
@@ -77,7 +80,12 @@ class YarnMetrics(SparkMetrics):
         items = [SparkMetrics.MEM_SECS,
                  SparkMetrics.VCORE_SECS,
                  SparkMetrics.SECS]
-        return self.collector.get_app_info(yarn_app_id, items)
+        try:
+            return self.collector.get_app_info(yarn_app_id, items)
+        except YarnMetricsError as e:
+            log.error("get_app_info " + yarn_app_id, exc_info=e)
+            default_values = [float("inf"), float("inf"), float("inf")]
+            return dict(zip(items, default_values))
 
 
 class ProcessMetrics(SparkMetrics):

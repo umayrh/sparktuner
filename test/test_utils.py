@@ -5,39 +5,39 @@ from sparktuner.util import Util, InvalidSize
 
 
 class WebRequestTest(unittest.TestCase):
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_query(self):
         pass
 
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_parse_file(self):
         pass
 
 
 class XmlParserTest(unittest.TestCase):
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_parse_file(self):
         pass
 
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_parse_string(self):
         pass
 
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_map_elements_to_list(self):
         pass
 
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_get_xml_element_data(self):
         pass
 
 
 class UtilsTest(unittest.TestCase):
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_isclose(self):
         pass
 
-    @unittest.skip
+    @unittest.skip("TODO")
     def test_ratio(self):
         pass
 

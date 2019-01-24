@@ -16,11 +16,20 @@ All Python dependencies are listed in:
 
 #### Build
 
-* `gradle clean build` to download and install all dependencies from scratch, and run tests.
-* `gradle flake8` to lint for style issues.
-* `gradle pytest` to run tests.
-* `gradle build -x getRequirements` to install all dependencies (assumes they've already
+* `./gradlew clean build` to download and install all dependencies from scratch, and run tests.
+* `./gradlew flake8` to lint for style issues.
+* `./gradlew pytest` to run tests.
+* `./gradlew build -x getRequirements` to install all dependencies (assumes they've already
 been downloaded).
+
+Some interesting build artifacts are:
+* `build/deployable/bin/sparktuner`
+* `build/deployable/bin/sparktuner.pex`
+* `build/distributions/sparktuner-0.1.0.tar.gz`
+* `build/wheel-cache/sparktuner-0.1.0-py2-none-any.whl`
+
+The Python virtual environment resides in `build/venv`, and can be activated using
+`source build/venv/bin/activate` and deactivated using `deactivate`.
 
 #### Usage
 

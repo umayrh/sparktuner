@@ -16,6 +16,7 @@
 
 # Python
 **/*.pyc
+activate
 
 # databases and logs
 **/opentuner.db
