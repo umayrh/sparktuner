@@ -1,0 +1,33 @@
+15/06/14 11:33:23 INFO yarn.Client: Requesting a new application from cluster with 2 NodeManagers
+15/06/14 11:33:23 INFO yarn.Client: Verifying our application has not requested more than the maximum memory capability of the cluster (2048 MB per container)
+15/06/14 11:33:23 INFO yarn.Client: Will allocate AM container, with 1408 MB memory including 384 MB overhead
+15/06/14 11:33:23 INFO yarn.Client: Setting up container launch context for our AM
+15/06/14 11:33:23 INFO yarn.Client: Preparing resources for our AM container
+15/06/14 11:33:24 INFO yarn.Client: Uploading resource file:/home/hadoop/.versions/spark-1.3.1.e/lib/spark-assembly-1.3.1-hadoop2.4.0.jar -> hdfs://172.31.13.68:9000/user/hadoop/.sparkStaging/application_1434263747091_0023/spark-assembly-1.3.1-hadoop2.4.0.jar
+15/06/14 11:33:29 INFO yarn.Client: Uploading resource file:/home/hadoop/test.jar -> hdfs://172.31.13.68:9000/user/hadoop/.sparkStaging/application_1434263747091_0023/test.jar
+15/06/14 11:33:31 INFO yarn.Client: Setting up the launch environment for our AM container
+15/06/14 11:33:31 INFO spark.SecurityManager: Changing view acls to: hadoop
+15/06/14 11:33:31 INFO spark.SecurityManager: Changing modify acls to: hadoop
+15/06/14 11:33:31 INFO spark.SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: Set(hadoop); users with modify permissions: Set(hadoop)
+15/06/14 11:33:31 INFO yarn.Client: Submitting application 23 to ResourceManager
+15/06/14 11:33:31 INFO impl.YarnClientImpl: Submitted application application_1434263747091_0023
+15/06/14 11:33:32 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:32 INFO yarn.Client:
+         client token: N/A
+         diagnostics: N/A
+         ApplicationMaster host: N/A
+         ApplicationMaster RPC port: -1
+         queue: default
+         start time: 1434281611893
+         final status: UNDEFINED
+         tracking URL: http://172.31.13.68:9046/proxy/application_1434263747091_0023/
+         user: hadoop
+15/06/14 11:33:33 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:34 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:35 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:36 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:37 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:38 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:39 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:40 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
+15/06/14 11:33:41 INFO yarn.Client: Application report for application_1434263747091_0023 (state: ACCEPTED)
