@@ -46,6 +46,7 @@ test/test_spark_tuner.py
 test/test_tuner_cfg.py
 test/test_utils.py
 test/test_yarn_metrics.py
+test/resources/spark-submit-yarn.txt
 test/resources/yarn-resp-app-info.json
 test/resources/yarn-resp-cluster-info.json
 test/resources/yarn-rm-response.xml

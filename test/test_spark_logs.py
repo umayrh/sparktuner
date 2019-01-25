@@ -26,6 +26,7 @@ class SparkLogProcessorTest(unittest.TestCase):
             "resources")
         log_file = os.path.join(log_dir, "spark-submit-yarn.txt")
         kwargs = {'shell': True}
+        # cat is not gonna work on non-Unix systems
         cmd_process = subprocess.Popen(
             "cat " + str(log_file),
             stdout=subprocess.PIPE,

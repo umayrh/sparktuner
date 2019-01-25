@@ -15,7 +15,7 @@ addons:
 before_install: ./scripts/travis-setup.sh
 
 install:
-  - ./gradlew build
+  - ./gradlew clean build
 
 jdk:
   - oraclejdk8
