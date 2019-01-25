@@ -8,6 +8,7 @@ from util import Util
 from multiprocessing.pool import ThreadPool
 
 from spark_metrics import SparkMetricsCollector
+from spark_logs import SparkLogProcessor
 from opentuner import MeasurementInterface
 from opentuner.resultsdb.models import Result
 from opentuner.search.manipulator import (NumericParameter,
@@ -38,11 +39,13 @@ class MeasurementInterfaceExt(MeasurementInterface):
         self.the_io_thread_pool = None
         self.metrics = SparkMetricsCollector(
             self.args.master.value, self.args.deploy_mode.value)
+        self.log_collector = SparkLogProcessor(
+            self.args.master.value, self.args.deploy_mode.value)
 
     def the_io_thread_pool_init(self, parallelism=1):
         if self.the_io_thread_pool is None:
             self.the_io_thread_pool = ThreadPool(2 * parallelism)
-            # make sure the threads are started up
+            # Make sure the threads are started up
             self.the_io_thread_pool.map(int, range(2 * parallelism))
 
     def call_program(self, cmd, limit=None, memory_limit=None, **kwargs):
@@ -66,6 +69,8 @@ class MeasurementInterfaceExt(MeasurementInterface):
           {'returncode': 0,
            'stdout': '', 'stderr': '',
            'timeout': False, 'time': 1.89}
+        :raises multiprocessing.TimeoutError if collecting stdout/stderr
+        logs takes more than `limit` seconds
         """
         inf = float('inf')
         self.the_io_thread_pool_init(self.args.parallelism)
@@ -76,32 +81,31 @@ class MeasurementInterfaceExt(MeasurementInterface):
             kwargs['shell'] = True
         killed = False
         t0 = time.time()
-        p = subprocess.Popen(
+        cmd_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             preexec_fn=preexec_setpgid_setrlimit(memory_limit),
             **kwargs)
-        process_id = p.pid
+        process_id = cmd_process.pid
         # TODO: extract this from spark-submit logs
-        yarn_app_id = None
         self.metrics.collector.start(pid=process_id)
         # Add p.pid to list of processes to kill
         # in case of keyboard interrupt
         self.pid_lock.acquire()
-        self.pids.append(p.pid)
+        self.pids.append(cmd_process.pid)
         self.pid_lock.release()
 
         try:
-            # TODO: to parse STDOUT asynchronously, we need something like
-            # apply_async(
-            #   _process_spark_submit_log,
-            #   args = (iter(self._submit_sp.stdout.readline, ''), )
-            # )
+            # We want to parse spark-submit's STDOUT asynchronously
             # while also collecting the logs themselves
-            stdout_result = self.the_io_thread_pool.apply_async(p.stdout.read)
-            stderr_result = self.the_io_thread_pool.apply_async(p.stderr.read)
-            while p.returncode is None:
+            stdout_result = self.the_io_thread_pool.apply_async(
+                self.log_collector.process_spark_submit_log,
+                args=(iter(cmd_process.stdout.readline, ''), )
+                )
+            stderr_result = self.the_io_thread_pool.apply_async(
+                cmd_process.stderr.read)
+            while cmd_process.returncode is None:
                 # No need to sleep since cpu_percent(interval=1)
                 # is a blocking call.
                 self.metrics.collector.update(pid=process_id, cpu_interval=1)
@@ -115,8 +119,9 @@ class MeasurementInterfaceExt(MeasurementInterface):
                     pass
                 elif limit and time.time() > t0 + limit:
                     killed = True
-                    self.kill_app(p.pid, yarn_app_id)
-                    goodwait(p)
+                    self.kill_app(cmd_process.pid,
+                                  self.log_collector.yarn_app_id)
+                    goodwait(cmd_process)
                 else:
                     # No need for the following wait block since
                     # we're already sampling process metrics above in a
@@ -129,27 +134,28 @@ class MeasurementInterfaceExt(MeasurementInterface):
                     # else:
                     #    time.sleep(0.001)
                     pass
-                p.poll()
+                cmd_process.poll()
         except Exception:
-            if p.returncode is None:
-                self.kill_app(p.pid, yarn_app_id)
+            if cmd_process.returncode is None:
+                self.kill_app(cmd_process.pid,
+                              self.log_collector.yarn_app_id)
             raise
         finally:
             # No longer need to kill p
             self.pid_lock.acquire()
-            if p.pid in self.pids:
-                self.pids.remove(p.pid)
+            if cmd_process.pid in self.pids:
+                self.pids.remove(cmd_process.pid)
             self.pid_lock.release()
 
         t1 = time.time()
         metrics = self.metrics.collector.get_perf_metrics(
-            pid=process_id, yarn_app_id=yarn_app_id)
+            pid=process_id, yarn_app_id=self.log_collector.yarn_app_id)
         result = {
             MeasurementInterfaceExt.TIME: inf if killed else (t1 - t0),
             MeasurementInterfaceExt.TIMEOUT: killed,
-            MeasurementInterfaceExt.RETURN_CODE: p.returncode,
-            MeasurementInterfaceExt.STDOUT: stdout_result.get(),
-            MeasurementInterfaceExt.STDERR: stderr_result.get()}
+            MeasurementInterfaceExt.RETURN_CODE: cmd_process.returncode,
+            MeasurementInterfaceExt.STDOUT: stdout_result.get(limit),
+            MeasurementInterfaceExt.STDERR: stderr_result.get(limit)}
         result.update(metrics)
         return result
 
@@ -162,7 +168,7 @@ class MeasurementInterfaceExt(MeasurementInterface):
         :param yarn_app_id: YARN application id (only used if Spark master
         is yarn)
         """
-        if self.args.master == "yarn":
+        if yarn_app_id and self.args.master == "yarn":
             kill_cmd = "yarn application -kill {}".format(yarn_app_id).split()
             yarn_kill = subprocess.Popen(kill_cmd,
                                          stdout=subprocess.PIPE,
