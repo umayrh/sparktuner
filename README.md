@@ -1,6 +1,8 @@
 # Spark Tuner
 
 [![Build Status](https://travis-ci.org/umayrh/sparktuner.svg?branch=master)](https://travis-ci.org/umayrh/sparktuner)
+[![Coverage Status](https://coveralls.io/repos/github/umayrh/sparktuner/badge.svg?branch=master)](https://coveralls.io/github/umayrh/sparktuner?branch=master)
+[![Maintainability](https://api.codeclimate.com/v1/badges/1b9ae406a6e8b922405a/maintainability)](https://codeclimate.com/github/umayrh/sparktuner/maintainability)
 
 ## Setup, build, and usage
 
