@@ -18,6 +18,10 @@
 **/*.pyc
 activate
 
+.coverage
+coverage.xml
+htmlcov/
+
 # databases and logs
 **/opentuner.db
 **/opentuner.log
