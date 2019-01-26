@@ -12,10 +12,14 @@ addons:
     packages:
       - axel
 
-before_install: ./scripts/travis-setup.sh
+before_install:
+  - ./scripts/travis-setup.sh
 
 install:
   - ./gradlew clean coverage build
+
+after_success:
+  - coveralls
 
 jdk:
   - oraclejdk8
