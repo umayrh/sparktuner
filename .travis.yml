@@ -13,7 +13,7 @@ addons:
       - axel
 
 before_install:
-  - pip install -r test_requirements.txt
+  - pip install --user -r test_requirements.txt
   - ./scripts/travis-setup.sh
 
 install:
