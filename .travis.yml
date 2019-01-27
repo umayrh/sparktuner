@@ -1,4 +1,4 @@
-language: python
+language: generic
 sudo: required
 # Promote to xenial when Travis fixes
 # https://travis-ci.community/t/oracle-jdk-11-and-10-are-pre-installed-not-the-openjdk-builds/785/6
@@ -18,8 +18,6 @@ before_install:
 
 install:
   - ./gradlew clean coverage build
-
-script: pytest
 
 after_success:
   - coveralls
