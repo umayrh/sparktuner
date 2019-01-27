@@ -19,6 +19,8 @@ before_install:
 install:
   - ./gradlew clean coverage build
 
+script: pytest
+
 after_success:
   - coveralls
 
