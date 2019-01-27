@@ -1,4 +1,4 @@
-language: generic
+language: python
 sudo: required
 # Promote to xenial when Travis fixes
 # https://travis-ci.community/t/oracle-jdk-11-and-10-are-pre-installed-not-the-openjdk-builds/785/6
@@ -13,7 +13,7 @@ addons:
       - axel
 
 before_install:
-  - pip install coveralls
+  - pip install -r test_requirements.txt
   - ./scripts/travis-setup.sh
 
 install:
@@ -29,12 +29,12 @@ python:
   - "2.7.10"
 
 cache:
+  pip
   apt: true
   packages: true
   directories:
     - $HOME/.m2
     - $HOME/.cache
-    - $HOME/.cache/pip
     - $TRAVIS_BUILD_DIR/build/venv/lib
 
 branches:
