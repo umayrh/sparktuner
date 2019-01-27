@@ -32,7 +32,6 @@ class MeasurementInterfaceExt(MeasurementInterface):
     TIMEOUT = 'timeout'
     RETURN_CODE = 'returncode'
     STDOUT = 'stdout'
-    STDERR = 'stderr'
 
     def __init__(self, *pargs, **kwargs):
         super(MeasurementInterfaceExt, self).__init__(*pargs, **kwargs)
@@ -43,10 +42,17 @@ class MeasurementInterfaceExt(MeasurementInterface):
             self.args.master.value, self.args.deploy_mode.value)
 
     def the_io_thread_pool_init(self, parallelism=1):
+        """
+        :param parallelism: This strange parameter comes from OpenTuner.
+        While it maintains the capacity to create multiple threads,
+        it doesn't imply that this implementation supports running
+        multiple, distinct spark-submit processes concurrently. For
+        the sake of compatibility, we maintain its semantics for now.
+        """
         if self.the_io_thread_pool is None:
-            self.the_io_thread_pool = ThreadPool(2 * parallelism)
+            self.the_io_thread_pool = ThreadPool(parallelism)
             # Make sure the threads are started up
-            self.the_io_thread_pool.map(int, range(2 * parallelism))
+            self.the_io_thread_pool.map(int, range(parallelism))
 
     def call_program(self, cmd, limit=None, memory_limit=None, **kwargs):
         """
@@ -81,14 +87,16 @@ class MeasurementInterfaceExt(MeasurementInterface):
             kwargs['shell'] = True
         killed = False
         t0 = time.time()
+        # Spark application logs may be spat out
+        # to STDERR so we combine the outputs to make
+        # it easier to process logs.
         cmd_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             preexec_fn=preexec_setpgid_setrlimit(memory_limit),
             **kwargs)
         process_id = cmd_process.pid
-        # TODO: extract this from spark-submit logs
         self.metrics.collector.start(pid=process_id)
         # Add p.pid to list of processes to kill
         # in case of keyboard interrupt
@@ -103,8 +111,6 @@ class MeasurementInterfaceExt(MeasurementInterface):
                 self.log_collector.process_spark_submit_log,
                 args=(iter(cmd_process.stdout.readline, ''), )
                 )
-            stderr_result = self.the_io_thread_pool.apply_async(
-                cmd_process.stderr.read)
             while cmd_process.returncode is None:
                 # No need to sleep since cpu_percent(interval=1)
                 # is a blocking call.
@@ -129,8 +135,6 @@ class MeasurementInterfaceExt(MeasurementInterface):
                     # sleep_for = limit - (time.time() - t0)
                     # if not stdout_result.ready():
                     #     stdout_result.wait(sleep_for)
-                    # elif not stderr_result.ready():
-                    #     stderr_result.wait(sleep_for)
                     # else:
                     #    time.sleep(0.001)
                     pass
@@ -148,14 +152,14 @@ class MeasurementInterfaceExt(MeasurementInterface):
             self.pid_lock.release()
 
         t1 = time.time()
+        stdout_result_output = stdout_result.get(limit)
         metrics = self.metrics.collector.get_perf_metrics(
             pid=process_id, yarn_app_id=self.log_collector.yarn_app_id)
         result = {
             MeasurementInterfaceExt.TIME: inf if killed else (t1 - t0),
             MeasurementInterfaceExt.TIMEOUT: killed,
             MeasurementInterfaceExt.RETURN_CODE: cmd_process.returncode,
-            MeasurementInterfaceExt.STDOUT: stdout_result.get(limit),
-            MeasurementInterfaceExt.STDERR: stderr_result.get(limit)}
+            MeasurementInterfaceExt.STDOUT: stdout_result_output}
         result.update(metrics)
         return result
 

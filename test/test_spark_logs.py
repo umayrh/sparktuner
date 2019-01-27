@@ -26,11 +26,13 @@ class SparkLogProcessorTest(unittest.TestCase):
             "resources")
         log_file = os.path.join(log_dir, "spark-submit-yarn.txt")
         kwargs = {'shell': True}
-        # cat is not gonna work on non-Unix systems
+        # FIXME cat is not gonna work on non-Unix systems.
+        # Redirect STDOUT to STDERR to mimic possible
+        # spark-submit output behavior.
         cmd_process = subprocess.Popen(
-            "cat " + str(log_file),
+            "cat " + str(log_file) + " 1>&2",
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             **kwargs)
         log_collector = SparkLogProcessor("yarn", "cluster")
         the_io_thread_pool = ThreadPool(1)

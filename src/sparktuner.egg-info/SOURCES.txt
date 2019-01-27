@@ -10,6 +10,7 @@ pinned.txt
 requirements.txt
 setup.cfg
 setup.py
+test_requirements.txt
 .github/ISSUE_TEMPLATE/bug_report.md
 .github/ISSUE_TEMPLATE/feature_request.md
 .github/ISSUE_TEMPLATE/information-request.md

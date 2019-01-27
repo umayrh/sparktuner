@@ -94,7 +94,7 @@ class YarnMetricsCollector(object):
     def get_webapp_port(yarn_property_map):
         """
         :param yarn_property_map: dict of YARN properties
-        :return: Default webapp port corresonding to YARN HTTP policy
+        :return: Default webapp port corresponding to YARN HTTP policy
         """
         return YarnResourceManager.DEFAULT_PORTS.get(
             YarnMetricsCollector.get_webapp_protocol(yarn_property_map))

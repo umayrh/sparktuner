@@ -108,7 +108,7 @@ class SparkConfigTuner(MeasurementInterfaceExt):
         # insufficient resources
         log.debug(str(run_result))
         assert run_result[MeasurementInterfaceExt.RETURN_CODE] == 0, \
-            run_result[MeasurementInterfaceExt.STDERR]
+            run_result[MeasurementInterfaceExt.STDOUT]
 
         # Log process performance metrics.
         metric_time = run_result[SparkMetrics.SECS]

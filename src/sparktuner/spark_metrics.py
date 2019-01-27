@@ -81,7 +81,10 @@ class YarnMetrics(SparkMetrics):
                  SparkMetrics.VCORE_SECS,
                  SparkMetrics.SECS]
         try:
-            return self.collector.get_app_info(yarn_app_id, items)
+            result = self.collector.get_app_info(yarn_app_id, items)
+            # Scaling down since elapsedTime is in millis
+            result[SparkMetrics.SECS] /= 1000
+            return result
         except YarnMetricsError as e:
             log.error("get_app_info " + yarn_app_id, exc_info=e)
             default_values = [float("inf"), float("inf"), float("inf")]
