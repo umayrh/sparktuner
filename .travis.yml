@@ -29,12 +29,12 @@ python:
   - "2.7.10"
 
 cache:
-  pip
   apt: true
   packages: true
   directories:
     - $HOME/.m2
     - $HOME/.cache
+    - $HOME/.cache/pip
     - $TRAVIS_BUILD_DIR/build/venv/lib
 
 branches:
