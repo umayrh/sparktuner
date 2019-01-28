@@ -28,17 +28,17 @@ bootstrapLinux() {
 ## Installs a specific version of Spark
 setupSpark() {
     local SPARK_DIR_NAME=spark-${SPARK_VERSION}
+    SPARK_DIST_NAME=${SPARK_DIR_NAME}-bin-hadoop${HADOOP_VERSION}
     if [[ ! -d "$HOME/.cache/${SPARK_DIR_NAME}" ]]; then
         cd $HOME/.cache
-        SPARK_DIST_NAME=${SPARK_DIR_NAME}-bin-hadoop${HADOOP_VERSION}
         rm -fr ./${SPARK_DIST_NAME}.tgz*
         axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
         tar -xf ./${SPARK_DIST_NAME}.tgz
-        export SPARK_HOME=`pwd`/${SPARK_DIST_NAME}
         # TODO: need a more systematic method for setting up Spark properties
         echo "spark.yarn.jars=${SPARK_HOME}/jars/*.jar" > ${SPARK_HOME}/conf/spark-defaults.conf
         cd ..
     fi
+    export SPARK_HOME="${HOME}/.cache/${SPARK_DIR_NAME}"
 }
 
 # Retry a given command

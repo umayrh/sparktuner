@@ -42,6 +42,8 @@ class MeasurementInterfaceExtTest(unittest.TestCase):
                             type=SparkParam.DEPLOY_MODE.make_param_from_str)
         return parser.parse_args(arg_list)
 
+    @unittest.skipIf("SPARK_HOME" not in os.environ,
+                     "SPARK_HOME environment variable not set.")
     def test_call_program_local(self):
         """
         Test that two successive runs of a spark-submit
