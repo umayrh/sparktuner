@@ -35,10 +35,10 @@ setupSpark() {
         axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
         tar -xf ./${SPARK_DIST_NAME}.tgz
         # TODO: need a more systematic method for setting up Spark properties
-        echo "spark.yarn.jars=${SPARK_HOME}/jars/*.jar" > ${SPARK_HOME}/conf/spark-defaults.conf
         cd ..
     fi
     export SPARK_HOME="${HOME}/.cache/${SPARK_DIR_NAME}"
+    echo "spark.yarn.jars=${SPARK_HOME}/jars/*.jar" > ${SPARK_HOME}/conf/spark-defaults.conf
 }
 
 # Retry a given command
