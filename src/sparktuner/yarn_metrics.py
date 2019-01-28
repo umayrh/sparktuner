@@ -240,11 +240,16 @@ class YarnMetricsCollector(object):
         :param yarn_webapp_proto: YARN HTTP protocol (http/https)
         :param yarn_rm_addr: Resource Manager webapp domain
         :param yarn_rm_port: Resource Manager webapp port.
-        :param yarn_app_id: YARN application id
+        :param yarn_app_id: YARN application id. If None or empty the
+        function returns an empty dict to avoid querying the
+        application universe.
         :param items: resource names to collect data for. If
         None, all information is collected.
         :return: a dict of resource name to resource values.
         """
+        if not yarn_app_id:
+            log.error("Invalid YARN application id")
+            return {}
         app_route = urljoin(YarnResourceManager.ROUTE_APP_ID, yarn_app_id)
 
         info = YarnMetricsCollector.call_yarn_api(yarn_webapp_proto,

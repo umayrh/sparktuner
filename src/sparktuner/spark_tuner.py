@@ -113,16 +113,13 @@ class SparkConfigTuner(MeasurementInterfaceExt):
         # Log process performance metrics.
         metric_time = run_result[SparkMetrics.SECS]
         metric_mem_mb = Util.ratio(run_result[SparkMetrics.MEM_SECS],
-                                   metric_time)
+                                   float(metric_time))
         metric_vcores = Util.ratio(run_result[SparkMetrics.VCORE_SECS],
-                                   metric_time)
+                                   float(metric_time))
         log.info("Application metrics: time=%0.3fs, mem=%0.3fmb, vcores=%0.3f"
                  % (metric_time, metric_mem_mb, metric_vcores))
 
-        # Unfortunately, size is a vector of tuner_cfg values at this point
-        # and so cannot be resolved into a scalar value.
-        return Result(time=run_result[MeasurementInterfaceExt.TIME],
-                      size=0)
+        return Result(time=metric_time, size=metric_mem_mb)
 
     def save_final_config(self, configuration):
         """Saves optimal configuration, after tuning, to a file"""
@@ -135,6 +132,10 @@ class SparkConfigTuner(MeasurementInterfaceExt):
 
     def objective(self):
         # TODO: add a flag to allow using a different objective function
+        # Instead of metric_time and metric_mem_mb, it may also make
+        # sense to use time=SparkMetrics.MEM_SECS and
+        # size=SparkMetrics.VCORE_SECS. That might represent overall
+        # cost better though may not minimize on runtime.
         return MinimizeTimeAndResource(
             rel_tol=0.06, ranged_param_dict=self.ranged_param_dict)
 

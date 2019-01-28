@@ -162,8 +162,6 @@ There are more detailed instructions for navigating GitHub's pull request system
     resource usage. E.g. if `spark.default.parallelism` ranging from 1 to 10 yields the 
     same runtime in all cases, the optimal configuration value should be 1.
     * Add tests for spark_metrics
-    * Extract YARN app id from call_program's stderr
-    * If master=yarn and RM server online, use size = YARN mb-second/runtime
     * Finally, allow different types of objective functions
     * Record metrics somewhere. Ideally, we'd also periodically record objects returned
     by Cluster Metrics API and Cluster Scheduler API to track externalities.

@@ -52,5 +52,6 @@ class SparkLogProcessor(object):
                     self.yarn_app_id = match.groups()[0]
                     log.info("Identified spark driver id: %s",
                              self.yarn_app_id)
-        # Hopefully, the logs aren't eggregiously ginormous
+        # Hopefully, the logs aren't eggregiously ginormous.
+        # If not, use some sort of online compression strategy.
         return ''.join(spark_submit_stdout_log)

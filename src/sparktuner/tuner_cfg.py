@@ -152,6 +152,9 @@ class MeasurementInterfaceExt(MeasurementInterface):
             self.pid_lock.release()
 
         t1 = time.time()
+        # Fetching the AsyncResult here in a bid to ensure that
+        # yarn_app_id, if any, has been parsed. Ideally, the same
+        # should also happen before calling kill_app()
         stdout_result_output = stdout_result.get(limit)
         metrics = self.metrics.collector.get_perf_metrics(
             pid=process_id, yarn_app_id=self.log_collector.yarn_app_id)
@@ -197,7 +200,7 @@ class ScaledIntegerParameter(ScaledNumericParameter, IntegerParameter):
     out of bounds after either scaling-unscaling or unscaling-scaling.
     A partial solution might be to ensure that scaling factor is
     _effectively_ a real between 0 and 1. We achieve this by rescaling
-    values by 1000000.
+    values by 1000.
     The current implementation may fail the following test because
     of rounding errors:
         result = param._scale(param._unscale(val))
