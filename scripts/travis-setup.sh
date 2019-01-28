@@ -28,7 +28,7 @@ bootstrapLinux() {
 ## 'export' commands
 createGlobalEnvFile() {
     echo "#!/bin/bash" > ${GLOBAL_ENV_FILE}
-    echo "set -ex" >> ${GLOBAL_ENV_FILE}
+    echo "set -e" >> ${GLOBAL_ENV_FILE}
 }
 
 ## Installs a specific version of Spark
