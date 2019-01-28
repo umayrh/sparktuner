@@ -1,13 +1,17 @@
 import os
-import unittest
 import random
 import shutil
+import unittest
 import tempfile
+import requests_mock
 
 from math import isnan
+from requests.compat import urljoin
 from argparse import ArgumentParser
 from opentuner import (Result, argparsers)
 from sparktuner.util import TestUtil
+from sparktuner.spark_metrics import SparkMetrics
+from sparktuner.yarn_metrics import YarnResourceManager
 from sparktuner.spark_default_param import SparkParam
 from sparktuner.tuner_cfg import (MeasurementInterfaceExt,
                                   ScaledIntegerParameter,
@@ -16,17 +20,21 @@ from sparktuner.tuner_cfg import (MeasurementInterfaceExt,
 
 class MeasurementInterfaceExtTest(unittest.TestCase):
     def setUp(self):
+        self.dir_path = os.path.dirname(os.path.abspath(__file__))
         self.temp_file = os.path.join(
             tempfile.gettempdir(), next(tempfile._get_candidate_names()))
+        self.yarn_dir = os.path.join(
+            os.path.dirname(os.path.abspath(__file__)),
+            "resources")
 
     def tearDown(self):
         if os.path.exists(self.temp_file):
             shutil.rmtree(self.temp_file)
 
     @staticmethod
-    def make_args():
+    def make_args(master="yarn", deploy_mode="cluster"):
         arg_list = ["--no-dups", "--test-limit", "1",
-                    "--master", "yarn", "--deploy_mode", "cluster"]
+                    "--master", master, "--deploy_mode", deploy_mode]
         parser = ArgumentParser(parents=argparsers())
         parser.add_argument("--master",
                             type=SparkParam.MASTER.make_param_from_str)
@@ -34,29 +42,69 @@ class MeasurementInterfaceExtTest(unittest.TestCase):
                             type=SparkParam.DEPLOY_MODE.make_param_from_str)
         return parser.parse_args(arg_list)
 
-    @unittest.skip("TODO")
-    @unittest.skipIf("SPARK_HOME" not in os.environ,
-                     "SPARK_HOME environment variable not set.")
-    def test_call_program(self):
+    def test_call_program_local(self):
         """
         Test that two successive runs of a spark-submit
         program produce distinct per-run data
         """
-        controller = MeasurementInterfaceExt(
-            MeasurementInterfaceExtTest.make_args())
-        spark_submit = os.environ.get("SPARK_HOME") + "/spark-submit"
-        dir_path = os.path.dirname(os.path.abspath(__file__))
-        jar_path = os.path.join(dir_path, TestUtil.JAR_NAME)
+        spark_submit = os.environ.get("SPARK_HOME") + "/bin/spark-submit"
+        jar_path = os.path.join(self.dir_path, TestUtil.JAR_NAME)
         basic_args = "--deploy-mode client --master \"local[*]\" " \
                      "--class com.umayrh.sort.Main --name sorter"
         cmd = " ".join(
             [spark_submit, basic_args, jar_path, "10", self.temp_file])
+        controller = MeasurementInterfaceExt(
+            MeasurementInterfaceExtTest.make_args("local[*]"))
+        result = controller.call_program(cmd)
+        self.assertTrue(result)
+        self.assertEqual(result[MeasurementInterfaceExt.RETURN_CODE], 0)
+        self.assertTrue(0 < result[SparkMetrics.SECS] < float("inf"))
+        self.assertGreaterEqual(SparkMetrics.VCORE_SECS, 1)
+        self.assertGreater(SparkMetrics.MEM_SECS, 0)
 
-        # TODO: register YARn endpoints for a mock request
+    @unittest.skipIf("SPARK_HOME" not in os.environ,
+                     "SPARK_HOME environment variable not set.")
+    @requests_mock.Mocker()
+    def test_call_program_yarn(self, mocker):
+        """
+        Test that two successive runs of a spark-submit
+        program produce distinct per-run data
+        """
+        spark_submit = os.environ.get("SPARK_HOME") + "/bin/spark-submit"
+        jar_path = os.path.join(self.dir_path, TestUtil.JAR_NAME)
+        basic_args = "--deploy-mode client --master \"local[*]\" " \
+                     "--class com.umayrh.sort.Main --name sorter"
+        cmd = " ".join(
+            [spark_submit, basic_args, jar_path, "10", self.temp_file])
+        yarn_resp_file = os.path.join(self.yarn_dir,
+                                      "yarn-resp-app-info.json")
+        # This creates a fake spark-submit output
+        cmd = "cat " + yarn_resp_file + " && " + cmd
+
+        # register YARN endpoints for mock requests
+        app_id = "application_1476912658570_0002"
+        proto, addr, port = ("http", "master", "8088")
+
+        TestUtil.yarn_api_helper(
+            self.yarn_dir, mocker,
+            "yarn-resp-cluster-info.json",
+            proto, addr, port,
+            YarnResourceManager.ROUTE_INFO)
+        TestUtil.yarn_api_helper(
+            self.yarn_dir, mocker,
+            "yarn-resp-app-info.json",
+            proto, addr, port,
+            urljoin(YarnResourceManager.ROUTE_APP_ID, app_id))
+
         with TestUtil.modified_environ(
                 'YARN_CONF_DIR', HADOOP_CONF_DIR=self.yarn_dir):
+            controller = MeasurementInterfaceExt(
+                MeasurementInterfaceExtTest.make_args())
             result = controller.call_program(cmd)
-            self.assertTrue(result)
+        self.assertEqual(result[MeasurementInterfaceExt.RETURN_CODE], 0)
+        self.assertTrue(0 < result[SparkMetrics.SECS] < float("inf"))
+        self.assertGreaterEqual(SparkMetrics.VCORE_SECS, 1)
+        self.assertGreater(SparkMetrics.MEM_SECS, 0)
 
 
 class ScaledIntegerParameterTest(unittest.TestCase):

@@ -1,5 +1,6 @@
 """Contains various data processing, parsing, or conversion utilities"""
 import os
+import json
 import logging
 import requests
 import contextlib
@@ -263,3 +264,15 @@ class TestUtil(object):
         finally:
             env.update(update_after)
             [env.pop(k) for k in remove_after]
+
+    @staticmethod
+    def yarn_api_helper(
+            yarn_dir, mocker, json_file, proto, addr, port, route):
+        headers = {"content-type": "application/json"}
+        info_resp_path = os.path.join(yarn_dir, json_file)
+        with open(info_resp_path) as json_file:
+            json_data = json.load(json_file)
+            base_url = proto + "://" + addr + ":" + port
+            req_url = urljoin(base_url, route)
+            mocker.get(req_url, json=json_data, headers=headers)
+        return json_data

@@ -1,5 +1,4 @@
 import os
-import json
 import os.path
 import unittest
 import requests_mock
@@ -112,21 +111,11 @@ class YarnMetricsServiceTest(unittest.TestCase):
         self.rm_webapp_addr_helper(
             mocker, yarn_properties, YarnProperty.RM_ADDR)
 
-    def yarn_api_helper(self, mocker, json_file, proto, addr, port, route):
-        headers = {"content-type": "application/json"}
-        info_resp_path = os.path.join(
-            self.yarn_dir, json_file)
-        with open(info_resp_path) as json_file:
-            json_data = json.load(json_file)
-            base_url = proto + "://" + addr + ":" + port
-            req_url = urljoin(base_url, route)
-            mocker.get(req_url, json=json_data, headers=headers)
-        return json_data
-
     @requests_mock.Mocker()
     def test_get_yarn_info(self, mocker):
         proto, addr, port = ("http", "spark.data", "8088")
-        expected_json_data = self.yarn_api_helper(
+        expected_json_data = TestUtil.yarn_api_helper(
+            self.yarn_dir,
             mocker,
             "yarn-resp-cluster-info.json",
             proto, addr, port,
@@ -139,7 +128,8 @@ class YarnMetricsServiceTest(unittest.TestCase):
     @requests_mock.Mocker()
     def test_get_yarn_app_info(self, mocker):
         proto, addr, port, app_id = ("http", "spark.data", "8088", "appid")
-        expected_json_data = self.yarn_api_helper(
+        expected_json_data = TestUtil.yarn_api_helper(
+            self.yarn_dir,
             mocker,
             "yarn-resp-app-info.json",
             proto, addr, port,
@@ -154,7 +144,8 @@ class YarnMetricsServiceTest(unittest.TestCase):
         # Need to set this up before yarn-site.xml
         # parsing since that involves calling the
         # api being tested here. _smh_
-        expected_json_data = self.yarn_api_helper(
+        expected_json_data = TestUtil.yarn_api_helper(
+            self.yarn_dir,
             mocker,
             "yarn-resp-cluster-info.json",
             "http", "master", "8088",
@@ -172,7 +163,8 @@ class YarnMetricsServiceTest(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_app_info(self, mocker):
-        self.yarn_api_helper(
+        TestUtil.yarn_api_helper(
+            self.yarn_dir,
             mocker,
             "yarn-resp-cluster-info.json",
             "http", "master", "8088",
@@ -183,7 +175,8 @@ class YarnMetricsServiceTest(unittest.TestCase):
             proto = collector.yarn_webapp_proto
             port = collector.yarn_webapp_port
             addr = collector.yarn_rm_webapp_addr
-        expected_json_data = self.yarn_api_helper(
+        expected_json_data = TestUtil.yarn_api_helper(
+            self.yarn_dir,
             mocker,
             "yarn-resp-app-info.json",
             proto, addr, port,
