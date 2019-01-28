@@ -19,7 +19,7 @@ before_install:
 
 install:
   - source ${GLOBAL_ENV_FILE}
-  - ./gradlew clean coverage build
+  - ./gradlew --console=plain clean coverage build
 
 after_success:
   - coveralls
