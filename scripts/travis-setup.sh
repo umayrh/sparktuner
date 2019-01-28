@@ -57,6 +57,7 @@ setupSpark() {
 
 ## Installs CI-specific Python packages
 installPipRequirements() {
+    cd ${TRAVIS_BUILD_DIR}
     pip install --user -r test_requirements.txt
 }
 
