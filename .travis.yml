@@ -5,7 +5,9 @@ sudo: required
 dist: trusty
 
 env:
-- PYENV_REHASH_TIMEOUT=120
+  global:
+    - GLOBAL_ENV_FILE="${HOME}/global_env.sh"
+    - PYENV_REHASH_TIMEOUT=120
 
 addons:
   apt:
@@ -13,11 +15,11 @@ addons:
       - axel
 
 before_install:
-  - pip install --user -r test_requirements.txt
   - ./scripts/travis-setup.sh
 
 install:
-  - ./gradlew clean coverage build
+  - source ${GLOBAL_ENV_FILE}
+  - ./gradlew --console=plain clean coverage build
 
 after_success:
   - coveralls
