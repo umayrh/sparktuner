@@ -33,6 +33,7 @@ setupSpark() {
         cd $HOME/.cache
         rm -fr ./${SPARK_DIST_NAME}.tgz*
         axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
+        ls -alh ${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
         tar -xf ./${SPARK_DIST_NAME}.tgz
         # TODO: need a more systematic method for setting up Spark properties
         cd ..
