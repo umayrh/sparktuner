@@ -29,16 +29,19 @@ bootstrapLinux() {
 setupSpark() {
     local SPARK_DIR_NAME=spark-${SPARK_VERSION}
     SPARK_DIST_NAME=${SPARK_DIR_NAME}-bin-hadoop${HADOOP_VERSION}
-    if [[ ! -d "$HOME/.cache/${SPARK_DIR_NAME}" ]]; then
+    if [[ ! -d "$HOME/.cache/${SPARK_DIST_NAME}" ]]; then
         cd $HOME/.cache
         rm -fr ./${SPARK_DIST_NAME}.tgz*
-        axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
-        ls -alh ${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
+        # Use axel again whe https://github.com/axel-download-accelerator/axel/issues/133
+        # has been fixed.
+        # axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
+        wget --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
+        ls -alh ${SPARK_DIST_NAME}.tgz
         tar -xf ./${SPARK_DIST_NAME}.tgz
         # TODO: need a more systematic method for setting up Spark properties
         cd ..
     fi
-    export SPARK_HOME="${HOME}/.cache/${SPARK_DIR_NAME}"
+    export SPARK_HOME="${HOME}/.cache/${SPARK_DIST_NAME}"
     echo "spark.yarn.jars=${SPARK_HOME}/jars/*.jar" > ${SPARK_HOME}/conf/spark-defaults.conf
 }
 
