@@ -45,10 +45,6 @@ class MeasurementInterfaceExtTest(unittest.TestCase):
     @unittest.skipIf("SPARK_HOME" not in os.environ,
                      "SPARK_HOME environment variable not set.")
     def test_call_program_local(self):
-        """
-        Test that two successive runs of a spark-submit
-        program produce distinct per-run data
-        """
         spark_submit = os.environ.get("SPARK_HOME") + "/bin/spark-submit"
         jar_path = os.path.join(self.dir_path, TestUtil.JAR_NAME)
         basic_args = "--deploy-mode client --master \"local[*]\" " \
