@@ -6,7 +6,7 @@ dist: trusty
 
 env:
   global:
-    - GLOBAL_ENV_FILE="global_env.sh"
+    - GLOBAL_ENV_FILE="${HOME}/global_env.sh"
     - PYENV_REHASH_TIMEOUT=120
 
 addons:
@@ -18,7 +18,7 @@ before_install:
   - ./scripts/travis-setup.sh
 
 install:
-  - source ${HOME}/${GLOBAL_ENV_FILE}
+  - source ${GLOBAL_ENV_FILE}
   - ./gradlew clean coverage build
 
 after_success:
