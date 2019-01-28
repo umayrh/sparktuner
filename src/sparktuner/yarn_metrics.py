@@ -1,10 +1,8 @@
 import os
-import logging
+import logging as log
 
 from requests.compat import urljoin
 from util import XmlParser, WebRequest, WebRequestError
-
-log = logging.getLogger(__name__)
 
 
 class YarnProperty(object):

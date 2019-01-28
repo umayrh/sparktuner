@@ -38,8 +38,6 @@ class MeasurementInterfaceExt(MeasurementInterface):
         self.the_io_thread_pool = None
         self.metrics = SparkMetricsCollector(
             self.args.master.value, self.args.deploy_mode.value)
-        self.log_collector = SparkLogProcessor(
-            self.args.master.value, self.args.deploy_mode.value)
 
     def the_io_thread_pool_init(self, parallelism=1):
         """
@@ -80,6 +78,10 @@ class MeasurementInterfaceExt(MeasurementInterface):
         """
         inf = float('inf')
         self.the_io_thread_pool_init(self.args.parallelism)
+        # The Spark log processor object maintains per-run state
+        # and so cannot be created in __init__.
+        log_collector = SparkLogProcessor(
+            self.args.master.value, self.args.deploy_mode.value)
 
         if limit is inf:
             limit = None
@@ -108,7 +110,7 @@ class MeasurementInterfaceExt(MeasurementInterface):
             # We want to parse spark-submit's STDOUT asynchronously
             # while also collecting the logs themselves
             stdout_result = self.the_io_thread_pool.apply_async(
-                self.log_collector.process_spark_submit_log,
+                log_collector.process_spark_submit_log,
                 args=(iter(cmd_process.stdout.readline, ''), )
                 )
             while cmd_process.returncode is None:
@@ -125,8 +127,7 @@ class MeasurementInterfaceExt(MeasurementInterface):
                     pass
                 elif limit and time.time() > t0 + limit:
                     killed = True
-                    self.kill_app(cmd_process.pid,
-                                  self.log_collector.yarn_app_id)
+                    self.kill_app(cmd_process.pid, log_collector.yarn_app_id)
                     goodwait(cmd_process)
                 else:
                     # No need for the following wait block since
@@ -141,8 +142,7 @@ class MeasurementInterfaceExt(MeasurementInterface):
                 cmd_process.poll()
         except Exception:
             if cmd_process.returncode is None:
-                self.kill_app(cmd_process.pid,
-                              self.log_collector.yarn_app_id)
+                self.kill_app(cmd_process.pid, log_collector.yarn_app_id)
             raise
         finally:
             # No longer need to kill p
@@ -157,7 +157,7 @@ class MeasurementInterfaceExt(MeasurementInterface):
         # should also happen before calling kill_app()
         stdout_result_output = stdout_result.get(limit)
         metrics = self.metrics.collector.get_perf_metrics(
-            pid=process_id, yarn_app_id=self.log_collector.yarn_app_id)
+            pid=process_id, yarn_app_id=log_collector.yarn_app_id)
         result = {
             MeasurementInterfaceExt.TIME: inf if killed else (t1 - t0),
             MeasurementInterfaceExt.TIMEOUT: killed,

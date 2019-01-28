@@ -1,17 +1,62 @@
+import os
 import unittest
 import random
+import shutil
+import tempfile
+
 from math import isnan
-from opentuner import Result
+from argparse import ArgumentParser
+from opentuner import (Result, argparsers)
+from sparktuner.util import TestUtil
+from sparktuner.spark_default_param import SparkParam
 from sparktuner.tuner_cfg import (MeasurementInterfaceExt,
                                   ScaledIntegerParameter,
                                   MinimizeTimeAndResource)
 
 
 class MeasurementInterfaceExtTest(unittest.TestCase):
-    @unittest.skip
+    def setUp(self):
+        self.temp_file = os.path.join(
+            tempfile.gettempdir(), next(tempfile._get_candidate_names()))
+
+    def tearDown(self):
+        if os.path.exists(self.temp_file):
+            shutil.rmtree(self.temp_file)
+
+    @staticmethod
+    def make_args():
+        arg_list = ["--no-dups", "--test-limit", "1",
+                    "--master", "yarn", "--deploy_mode", "cluster"]
+        parser = ArgumentParser(parents=argparsers())
+        parser.add_argument("--master",
+                            type=SparkParam.MASTER.make_param_from_str)
+        parser.add_argument("--deploy_mode",
+                            type=SparkParam.DEPLOY_MODE.make_param_from_str)
+        return parser.parse_args(arg_list)
+
+    @unittest.skip("TODO")
+    @unittest.skipIf("SPARK_HOME" not in os.environ,
+                     "SPARK_HOME environment variable not set.")
     def test_call_program(self):
-        MeasurementInterfaceExt()
-        pass
+        """
+        Test that two successive runs of a spark-submit
+        program produce distinct per-run data
+        """
+        controller = MeasurementInterfaceExt(
+            MeasurementInterfaceExtTest.make_args())
+        spark_submit = os.environ.get("SPARK_HOME") + "/spark-submit"
+        dir_path = os.path.dirname(os.path.abspath(__file__))
+        jar_path = os.path.join(dir_path, TestUtil.JAR_NAME)
+        basic_args = "--deploy-mode client --master \"local[*]\" " \
+                     "--class com.umayrh.sort.Main --name sorter"
+        cmd = " ".join(
+            [spark_submit, basic_args, jar_path, "10", self.temp_file])
+
+        # TODO: register YARn endpoints for a mock request
+        with TestUtil.modified_environ(
+                'YARN_CONF_DIR', HADOOP_CONF_DIR=self.yarn_dir):
+            result = controller.call_program(cmd)
+            self.assertTrue(result)
 
 
 class ScaledIntegerParameterTest(unittest.TestCase):

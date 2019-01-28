@@ -4,16 +4,12 @@ import unittest
 import os
 import shutil
 import tempfile
+
+from sparktuner.util import TestUtil
 from sparktuner.spark_tuner import SparkConfigTuner
 
 
 class SparkTunerTest(unittest.TestCase):
-    """
-    Note: the JAR used here is a slim, unshaded file, and
-    so should not be used for full functionality.
-    """
-    JAR_NAME = "sort-0.1-all.jar"
-
     @staticmethod
     def get_tempfile_name():
         return os.path.join(tempfile.gettempdir(),
@@ -23,7 +19,7 @@ class SparkTunerTest(unittest.TestCase):
     def make_args(temp_file):
         program_conf = "10 " + temp_file
         dir_path = os.path.dirname(os.path.abspath(__file__))
-        jar_path = os.path.join(dir_path, SparkTunerTest.JAR_NAME)
+        jar_path = os.path.join(dir_path, TestUtil.JAR_NAME)
         return ["--no-dups",
                 "--test-limit", "1",
                 "--name", "sorter",

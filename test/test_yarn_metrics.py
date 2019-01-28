@@ -2,50 +2,13 @@ import os
 import json
 import os.path
 import unittest
-import contextlib
 import requests_mock
 
 from requests.compat import urljoin
+from sparktuner.util import TestUtil
 from sparktuner.yarn_metrics import (YarnMetricsCollector,
                                      YarnProperty,
                                      YarnResourceManager)
-
-
-class YarnMetricsTestUtil(object):
-    @staticmethod
-    @contextlib.contextmanager
-    def modified_environ(*remove, **update):
-        """
-        Temporarily updates the ``os.environ`` dictionary in-place.
-
-        The ``os.environ`` dictionary is updated in-place so that
-        the modification is sure to work in all situations.
-
-        This function is cribbed from:
-          https://github.com/laurent-laporte-pro/stackoverflow-q2059482
-
-        :param remove: Environment variables to remove.
-        :param update: Dictionary of environment variables and values
-        to add/update.
-        """
-        env = os.environ
-        update = update or {}
-        remove = remove or []
-
-        # List of environment variables being updated or removed.
-        stomped = (set(update.keys()) | set(remove)) & set(env.keys())
-        # Environment variables and values to restore on exit.
-        update_after = {k: env[k] for k in stomped}
-        # Environment variables and values to remove on exit.
-        remove_after = frozenset(k for k in update if k not in env)
-
-        try:
-            env.update(update)
-            [env.pop(k, None) for k in remove]
-            yield
-        finally:
-            env.update(update_after)
-            [env.pop(k) for k in remove_after]
 
 
 class YarnMetricsConfigTest(unittest.TestCase):
@@ -55,7 +18,7 @@ class YarnMetricsConfigTest(unittest.TestCase):
             "resources")
 
     def test_get_yarn_site_path(self):
-        with YarnMetricsTestUtil.modified_environ(
+        with TestUtil.modified_environ(
                 'YARN_CONF_DIR', HADOOP_CONF_DIR=self.yarn_dir):
             yarn_site_path = YarnMetricsCollector.get_yarn_site_path()
             self.assertIsNotNone(yarn_site_path)
@@ -65,7 +28,7 @@ class YarnMetricsConfigTest(unittest.TestCase):
             self.assertEqual(
                 self.yarn_dir, os.path.dirname(yarn_site_path))
 
-        with YarnMetricsTestUtil.modified_environ(
+        with TestUtil.modified_environ(
                 'HADOOP_CONF_DIR', YARN_CONF_DIR=self.yarn_dir):
             yarn_site_path = YarnMetricsCollector.get_yarn_site_path()
             self.assertIsNotNone(yarn_site_path)
@@ -75,7 +38,7 @@ class YarnMetricsConfigTest(unittest.TestCase):
             self.assertEqual(
                 self.yarn_dir, os.path.dirname(yarn_site_path))
 
-        with YarnMetricsTestUtil.modified_environ(
+        with TestUtil.modified_environ(
                 'YARN_CONF_DIR', 'HADOOP_CONF_DIR'):
             self.assertIsNone(YarnMetricsCollector.get_yarn_site_path())
 
@@ -196,7 +159,7 @@ class YarnMetricsServiceTest(unittest.TestCase):
             "yarn-resp-cluster-info.json",
             "http", "master", "8088",
             YarnResourceManager.ROUTE_INFO)
-        with YarnMetricsTestUtil.modified_environ(
+        with TestUtil.modified_environ(
                 'YARN_CONF_DIR', HADOOP_CONF_DIR=self.yarn_dir):
             collector = YarnMetricsCollector()
             proto = collector.yarn_webapp_proto
@@ -214,7 +177,7 @@ class YarnMetricsServiceTest(unittest.TestCase):
             "yarn-resp-cluster-info.json",
             "http", "master", "8088",
             YarnResourceManager.ROUTE_INFO)
-        with YarnMetricsTestUtil.modified_environ(
+        with TestUtil.modified_environ(
                 'YARN_CONF_DIR', HADOOP_CONF_DIR=self.yarn_dir):
             collector = YarnMetricsCollector()
             proto = collector.yarn_webapp_proto
