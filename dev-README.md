@@ -4,12 +4,16 @@
 
 ### Setup
 
+See also
+* [spark-install](https://github.com/zipfian/spark-install)
+* [Spark+ipython_on_MacOS.md](https://gist.github.com/ololobus/4c221a0891775eaa86b0)
+
 #### Mac
 
 Assuming `brew` is installed:
 
 * Install XCode: `xcode-select --install`
-* Install Java: `brew cask install java`
+* Install Java: `brew tap caskroom/versions && brew cask install java8`
 * Run `java -version` to ensure Java 1.8
 
 To install Apache Spark:
@@ -124,9 +128,6 @@ is desired.
 
 #### Spark 
 
-See [here](../../sparkScala/INSTALL.md) for short installation guide, and 
-[here](../../sparkScala/SPARK.md) for general Spark notes.
-
 ##### Spark configuration parameters 
 
 Note that some commonly used Spark (2.0.2+) parameters:
@@ -153,6 +154,12 @@ Note that some commonly used Spark (2.0.2+) parameters:
 
 For a larger set, see 
 [this](https://spark.apache.org/docs/2.4.0/configuration.html).
+
+##### Spark performance tuning
+
+* [sparklens](https://github.com/umayrh/sparklens)
+* [dr-elephant](https://github.com/linkedin/dr-elephant)
+* [sparklint](https://github.com/groupon/sparklint)
 
 #### YARN
 
