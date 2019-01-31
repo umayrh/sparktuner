@@ -4,6 +4,15 @@
 [![Coverage Status](https://coveralls.io/repos/github/umayrh/sparktuner/badge.svg?branch=master)](https://coveralls.io/github/umayrh/sparktuner?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/1b9ae406a6e8b922405a/maintainability)](https://codeclimate.com/github/umayrh/sparktuner/maintainability)
 
+
+#### Objectives:
+
+- Tune Spark configuration parameters in a hands-off manner
+- Learn from tuning experiences over time to:
+    - Tune more efficiently over time,
+    - Answer counterfactual questions about application performance, and
+    - Suggest interventions to improve application performance (potentially even code changes or environment updates apart from configuration setting)
+
 ## Setup, build, and usage
 
 #### Setup

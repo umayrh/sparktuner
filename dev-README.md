@@ -39,6 +39,38 @@ There are more detailed instructions for navigating GitHub's pull request system
 
 ## TODO
 
+#### Objectives:
+* Tune Spark configuration parameters in a hands-off manner
+* Learn from tuning experiences over time to:
+    * Tune more efficiently over time,
+    * Answer counterfactual questions about application performance, and
+    * Suggest interventions to improve application performance (potentially even 
+      code changes or environment updates apart from configuration setting).
+
+#### High-level directions:
+* Optimization: which algorithms are most effective for tuning Spark, and why? 
+  The meta question is that of Optimal design, and selection of appropriate objective. 
+  Some possible algos:
+    * Zero-gradient technique e.g. Random Nelder-Mead
+    * Multi-armed bandit
+    * Branch-and-bound sampling e.g. Latin Hypercube sampling
+    * Bayesian optimization
+    * Control-theoretic techniques e.g. Kalman filtering
+* Learning: is there a way to encode information about Spark parameter’s effect on 
+  runtime/resources for a fixed app?
+    * Want to be able to ask counterfactual questions about parameters, code change, 
+      or data size change.
+* Extensions: 
+    * What other RM frameworks, apart from YARN, should this work on?
+    * What kind of UI might be useful? Job submission framework?
+    * What kind of backend service would be useful?
+    * Should we allow running tests in parallel? What changes would be required?
+    * What kind of metrics should be stored, and where?
+* Externalities: 
+    * How can cluster issues be accounted for?
+    * How can code issues be accounted for using the query plan and configuration 
+      information?
+
 #### Urgent
 * Fix `sort` to write to local filesystem by default. See 
   [this](https://stackoverflow.com/questions/27299923/how-to-load-local-file-in-sc-textfile-instead-of-hdfs)
@@ -160,6 +192,10 @@ For a larger set, see
 * [sparklens](https://github.com/umayrh/sparklens)
 * [dr-elephant](https://github.com/linkedin/dr-elephant)
 * [sparklint](https://github.com/groupon/sparklint)
+* [sparkMeasure](https://github.com/LucaCanali/sparkMeasure)
+
+
+* A Methodology for Spark Parameter Tuning [link](delab.csd.auth.gr/papers/BDR2017gt.pdf)
 
 #### YARN
 
