@@ -4,6 +4,7 @@ LICENSE
 README.md
 README.txt
 build.gradle
+dev-README.md
 gradlew
 gradlew.bat
 pinned.txt
@@ -17,6 +18,7 @@ test_requirements.txt
 gradle/wrapper/gradle-wrapper.jar
 gradle/wrapper/gradle-wrapper.properties
 scripts/get_requirements.py
+scripts/pivy-importer-0.12.8-SNAPSHOT-all.jar
 scripts/pivy-importer-0.9.9-all.jar
 scripts/travis-setup.sh
 src/sparktuner/__init__.py
