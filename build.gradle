@@ -84,14 +84,14 @@ installBuildRequirements.dependsOn getRequirements
 
 dependencies {
     python 'pypi:psutil:5.4.8'
-    python 'pypi:requests:2.21.0'
-    python 'pypi:opentuner:0.8.0'
+    python 'pypi:requests:2.22.0'
+    python 'pypi:opentuner:0.8.2'
     // dunno why this was packaged anyway but cannot
     // build wheel for unittest2. Thanks to
     // https://github.com/linkedin/pygradle/issues/96
-    python ('pypi:humanfriendly:4.17') {
+    python ('pypi:humanfriendly:4.18') {
         exclude module: 'unittest2'
     }
-    python 'pypi:chainmap:1.0.2'
+    python 'pypi:chainmap:1.0.3'
     test 'pypi:requests-mock:1.5.2'
 }
