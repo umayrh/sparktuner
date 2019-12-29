@@ -5,8 +5,9 @@ set -ex
 OS=$(uname -s)
 
 ## Service versions
-SPARK_VERSION=${SPARK_VERSION:-"2.4.0"}
+SPARK_VERSION=${SPARK_VERSION:-"2.4.4"}
 HADOOP_VERSION=${HADOOP_VERSION:-"2.7"}
+SPARK_MIRROR="http://ftp.wayne.edu/apache/spark/spark-${SPARK_VERSION}/spark-${SPARK_VERSION}-bin-hadoop${HADOOP_VERSION}.tgz"
 
 ## OS-specific package installation
 bootstrap() {
@@ -34,16 +35,15 @@ createGlobalEnvFile() {
 ## Installs a specific version of Spark
 setupSpark() {
     local SPARK_DIR_NAME=spark-${SPARK_VERSION}
-    SPARK_DIST_NAME=${SPARK_DIR_NAME}-bin-hadoop${HADOOP_VERSION}
-    if [[ ! -d "$HOME/.cache/${SPARK_DIST_NAME}" ]]; then
+    if [[ ! -d "$HOME/.cache/${SPARK_DIR_NAME}" ]]; then
         cd $HOME/.cache
+        SPARK_DIST_NAME=${SPARK_DIR_NAME}-bin-hadoop${HADOOP_VERSION}
         rm -fr ./${SPARK_DIST_NAME}.tgz*
-        # Use axel again when https://github.com/axel-download-accelerator/axel/issues/192
-        # has been fixed.
-        # axel --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
-        wget --quiet http://www-us.apache.org/dist/spark/${SPARK_DIR_NAME}/${SPARK_DIST_NAME}.tgz
-        ls -alh ${SPARK_DIST_NAME}.tgz
+        axel --quiet ${SPARK_MIRROR}
         tar -xf ./${SPARK_DIST_NAME}.tgz
+        export SPARK_HOME=`pwd`/${SPARK_DIST_NAME}
+        # TODO: need a more systematic method for setting up Spark properties
+        echo "spark.yarn.jars=${SPARK_HOME}/jars/*.jar" > ${SPARK_HOME}/conf/spark-defaults.conf
         cd ..
     fi
     export SPARK_HOME="${HOME}/.cache/${SPARK_DIST_NAME}"

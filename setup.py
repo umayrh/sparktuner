@@ -152,7 +152,7 @@ setup(
     description='Package for automating Spark application tuning',
     long_description=open('README.txt').read(),
     install_requires=[
-        "opentuner==0.8.0",
+        "opentuner==0.8.2",
         "humanfriendly==4.17",
         "chainmap==1.0.2",
         "psutil==5.4.8",
