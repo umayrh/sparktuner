@@ -153,10 +153,10 @@ setup(
     long_description=open('README.txt').read(),
     install_requires=[
         "opentuner==0.8.2",
-        "humanfriendly==4.17",
-        "chainmap==1.0.2",
+        "humanfriendly==4.18",
+        "chainmap==1.0.3",
         "psutil==5.4.8",
-        "requests==2.21.0"
+        "requests==2.22.0"
     ],
     entry_points={
         'console_scripts': [
