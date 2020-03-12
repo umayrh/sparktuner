@@ -155,7 +155,7 @@ setup(
         "opentuner==0.8.2",
         "humanfriendly==4.18",
         "chainmap==1.0.3",
-        "psutil==5.4.8",
+        "psutil==5.6.6",
         "requests==2.22.0"
     ],
     entry_points={
