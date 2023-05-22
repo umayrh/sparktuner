@@ -156,7 +156,7 @@ setup(
         "humanfriendly==4.18",
         "chainmap==1.0.3",
         "psutil==5.4.8",
-        "requests==2.22.0"
+        "requests==2.31.0"
     ],
     entry_points={
         'console_scripts': [
